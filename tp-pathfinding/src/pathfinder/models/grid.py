@@ -78,6 +78,9 @@ class Grid:
             possible_actions[action] = (r, c)
 
         return possible_actions
+    
+    def h_manhatan(self, node_start: tuple[int, int])->int:
+        return abs(node_start[0] - self.end[0]) + abs(node_start[1] - self.end[1])
 
     def __repr__(self) -> str:
         return f"Grid([[...], ...], {self.start}, {self.end})"
