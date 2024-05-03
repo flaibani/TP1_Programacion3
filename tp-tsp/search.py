@@ -90,11 +90,59 @@ class HillClimbing(LocalSearch):
                 value = value + diff[act]
                 self.niters += 1
 
-
 class HillClimbingReset(LocalSearch):
-    """Algoritmo de ascension de colinas con reinicio aleatorio."""
+    def solve(self, problem: OptProblem):
+        """Resuelve un problema de optimizacion con ascension de colinas.
 
-    # COMPLETAR
+        Argumentos:
+        ==========
+        problem: OptProblem
+            un problema de optimizacion
+        repeat: int
+            número de reinicios aleatorios permitidos
+        """
+        # Inicio del reloj
+        start = time()
+
+        # Arrancamos del estado inicial
+        actual = problem.init
+        value = problem.obj_val(problem.init)
+        self.value = float('-inf')
+        repeat = 20
+        while True:
+
+            # Determinar las acciones que se pueden aplicar
+            # y las diferencias en valor objetivo que resultan
+            diff = problem.val_diff(actual)
+
+            # Buscar las acciones que generan el mayor incremento de valor obj
+            max_acts = [act for act, val in diff.items() if val ==
+                        max(diff.values())]
+
+            # Elegir una accion aleatoria
+            act = choice(max_acts)
+            
+            # Retornar si estamos en un optimo local 
+            # (diferencia de valor objetivo no positiva)
+            if diff[act] <= 0:
+                repeat -= 1
+                if self.value < value:
+                    self.tour = actual
+                    self.value = value
+                if repeat == 0:
+                    end = time()
+                    self.time = end - start
+                    return
+                else: 
+                    actual = problem.random_reset()
+                    value = problem.obj_val(actual)
+                                    
+            # Sino, nos movemos al sucesor
+            else:
+
+                actual = problem.result(actual, act)
+                value = value + diff[act]
+                self.niters += 1
 
 
 class Tabu(LocalSearch):
