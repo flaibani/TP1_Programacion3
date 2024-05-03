@@ -108,6 +108,10 @@ class HillClimbingReset(LocalSearch):
         actual = problem.init
         value = problem.obj_val(problem.init)
         self.value = float('-inf')
+        #Se repite 20 veces porque así se garantiza 
+        #alcanzar el mayor máximo local que permite el  
+        #ascenso de colina y a su vez el consumo 
+        #de tiempo no es significativo. 
         repeat = 20
         while True:
 
@@ -122,17 +126,21 @@ class HillClimbingReset(LocalSearch):
             # Elegir una accion aleatoria
             act = choice(max_acts)
             
-            # Retornar si estamos en un optimo local 
+            # Encontramos un máximo local 
             # (diferencia de valor objetivo no positiva)
             if diff[act] <= 0:
                 repeat -= 1
+                #El valor objetivo se mejora 
                 if self.value < value:
                     self.tour = actual
                     self.value = value
+                #Retornamos porque agotamos la posibilidad 
+                #de reiniciar la búsqueda
                 if repeat == 0:
                     end = time()
                     self.time = end - start
                     return
+                #Reiniciamos la búsqueda con un nuevo estado inicial 
                 else: 
                     actual = problem.random_reset()
                     value = problem.obj_val(actual)
