@@ -22,7 +22,8 @@ def main() -> None:
     """Funcion principal."""
     # Parsear los argumentos de la linea de comandos
     args = parse.parse()
-
+    """ print("argumento")
+    print(args.filename) """
     # Leer la instancia
     G, coords = load.read_tsp(args.filename)
 
@@ -36,7 +37,7 @@ def main() -> None:
 
     # Resolver el TSP con cada algoritmo
     for algo in algos.values():
-        algo.solve(p)
+        algo.solve(p,args.filename)
 
     # Mostrar resultados por linea de comandos
     print("Valor:", "Tiempo:", "Iters:", "Algoritmo:", sep="\t\t")

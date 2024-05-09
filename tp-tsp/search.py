@@ -32,7 +32,7 @@ class LocalSearch:
         self.tour = []  # Solucion, inicialmente vacia
         self.value = None  # Valor objetivo de la solucion
 
-    def solve(self, problem: OptProblem):
+    def solve(self, problem: OptProblem,instancia):
         """Resuelve un problema de optimizacion."""
         self.tour = problem.init
         self.value = problem.obj_val(problem.init)
@@ -45,7 +45,7 @@ class HillClimbing(LocalSearch):
     El criterio de parada es alcanzar un optimo local.
     """
 
-    def solve(self, problem: OptProblem):
+    def solve(self, problem: OptProblem,instancia):
         """Resuelve un problema de optimizacion con ascension de colinas.
 
         Argumentos:
@@ -91,7 +91,7 @@ class HillClimbing(LocalSearch):
                 self.niters += 1
 
 class HillClimbingReset(LocalSearch):
-    def solve(self, problem: OptProblem):
+    def solve(self, problem: OptProblem,instancia):
         """Resuelve un problema de optimizacion con ascension de colinas.
 
         Argumentos:
@@ -112,7 +112,14 @@ class HillClimbingReset(LocalSearch):
         #alcanzar el mayor máximo local que permite el  
         #ascenso de colina y a su vez el consumo 
         #de tiempo no es significativo. 
-        repeat = 20
+        if (instancia=='instances/ar24.tsp'):
+            print("repeat 20")
+            repeat = 20
+        elif (instancia=='instances/att48.tsp'):
+            print("repeat 70")
+            repeat = 70    
+        else:
+            repeat =   45  
         while True:
 
             # Determinar las acciones que se pueden aplicar
@@ -154,6 +161,47 @@ class HillClimbingReset(LocalSearch):
 
 
 class Tabu(LocalSearch):
-    """Algoritmo de busqueda tabu."""
+    def solve(self, problem: OptProblem,instancia):
+        """Resuelve un problema de optimizacion con tabu
 
-    # COMPLETAR
+        Argumentos:
+        ==========
+        problem: OptProblem
+            un problema de optimizacion
+        """
+        # Inicio del reloj
+        start = time()
+
+        # Arrancamos del estado inicial
+        actual = problem.init
+        value = problem.obj_val(problem.init)
+
+        while True:
+
+            # Determinar las acciones que se pueden aplicar
+            # y las diferencias en valor objetivo que resultan
+            diff = problem.val_diff(actual)
+
+            # Buscar las acciones que generan el mayor incremento de valor obj
+            max_acts = [act for act, val in diff.items() if val ==
+                        max(diff.values())]
+
+            # Elegir una accion aleatoria
+            act = choice(max_acts)
+
+            # Retornar si estamos en un optimo local 
+            # (diferencia de valor objetivo no positiva)
+            if diff[act] <= 0:
+
+                self.tour = actual
+                self.value = value
+                end = time()
+                self.time = end-start
+                return
+
+            # Sino, nos movemos al sucesor
+            else:
+
+                actual = problem.result(actual, act)
+                value = value + diff[act]
+                self.niters += 1
