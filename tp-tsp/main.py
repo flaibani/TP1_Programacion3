@@ -33,7 +33,7 @@ def main() -> None:
     # Construir las instancias de los algoritmos
     algos = {HILL_CLIMBING: search.HillClimbing(),
              HILL_CLIMBING_RANDOM_RESET: search.HillClimbingReset(),
-             TABU_SEARCH: search.Tabu(3)}
+             TABU_SEARCH: search.Tabu()}
 
     # Resolver el TSP con cada algoritmo
     for algo in algos.values():

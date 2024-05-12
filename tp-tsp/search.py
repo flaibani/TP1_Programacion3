@@ -32,7 +32,7 @@ class LocalSearch:
         self.tour = []  # Solucion, inicialmente vacia
         self.value = None  # Valor objetivo de la solucion
 
-    def solve(self, problem: OptProblem,instancia):
+    def solve(self, problem: OptProblem, instancia):
         """Resuelve un problema de optimizacion."""
         self.tour = problem.init
         self.value = problem.obj_val(problem.init)
@@ -45,7 +45,7 @@ class HillClimbing(LocalSearch):
     El criterio de parada es alcanzar un optimo local.
     """
 
-    def solve(self, problem: OptProblem,instancia):
+    def solve(self, problem: OptProblem, instancia):
         """Resuelve un problema de optimizacion con ascension de colinas.
 
         Argumentos:
@@ -76,7 +76,6 @@ class HillClimbing(LocalSearch):
             # Retornar si estamos en un optimo local 
             # (diferencia de valor objetivo no positiva)
             if diff[act] <= 0:
-
                 self.tour = actual
                 self.value = value
                 end = time()
@@ -85,13 +84,13 @@ class HillClimbing(LocalSearch):
 
             # Sino, nos movemos al sucesor
             else:
-
                 actual = problem.result(actual, act)
                 value = value + diff[act]
                 self.niters += 1
 
 class HillClimbingReset(LocalSearch):
-    def solve(self, problem: OptProblem,instancia):
+
+    def solve(self, problem: OptProblem, instancia):
         """Resuelve un problema de optimizacion con ascension de colinas.
 
         Argumentos:
@@ -129,10 +128,10 @@ class HillClimbingReset(LocalSearch):
             # Buscar las acciones que generan el mayor incremento de valor obj
             max_acts = [act for act, val in diff.items() if val ==
                         max(diff.values())]
-
+            #print("max_acts HCR", max_acts)
             # Elegir una accion aleatoria
             act = choice(max_acts)
-            
+            #print("act HCR", act)
             # Encontramos un máximo local 
             # (diferencia de valor objetivo no positiva)
             if diff[act] <= 0:
@@ -154,7 +153,6 @@ class HillClimbingReset(LocalSearch):
                                     
             # Sino, nos movemos al sucesor
             else:
-
                 actual = problem.result(actual, act)
                 value = value + diff[act]
                 self.niters += 1
@@ -164,7 +162,7 @@ class Tabu(LocalSearch):
     """Algoritmo de busqueda tabu."""
 
     # COMPLETAR
-    def solve(self, problem: OptProblem):
+    def solve(self, problem: OptProblem, instancia):
         """Resuelve un problema de optimizacion con ascension de colinas.
         Argumentos:
         ==========
@@ -178,30 +176,53 @@ class Tabu(LocalSearch):
         actual = problem.init
         value = problem.obj_val(problem.init)
         better = actual
+        value_better = value
         tabu_list = []  # Lista Tabú
-        tabu_size = 100  # Tamaño de la lista Tabú
+        tabu_size = 3  # Tamaño de la lista Tabú
 
-        while self.niters < 500:
+        while self.niters < 100:
             # Determinar las acciones que se pueden aplicar
             # y las diferencias en valor objetivo que resultan
             diff = problem.val_diff(actual)
 
             # Buscar las acciones que generan el mayor incremento de valor obj
+            # y que no están en la lista Tabu
             max_acts = [act for act, val in diff.items() if val ==
                         max(diff.values())]
+            #max_acts = [act for act, val in diff.items()]
+            print("max_acts", max_acts)
 
+            # lista de acciones que no están en la lista tabu
+            no_tabu = [act for act in max_acts if act not in tabu_list]
+            #print("no_tabu", no_tabu)
+
+            # Si no hay acciones disponibles, terminar la búsqueda
+            if not no_tabu:
+                print("pasos", self.niters)
+                break
             # Elegir una accion aleatoria
-            act = choice(max_acts)
+            act = choice(no_tabu)
 
+            # Actualizar la lista Tabú
+            tabu_list.append(act)
+            print("tabu_list", tabu_list)
 
+            # Si pasó el largo máximode la lista, elimina el primer elemento ingresado
+            if len(tabu_list) > tabu_size:
+                tabu_list.pop(0)
 
             actual = problem.result(actual, act)
             value = value + diff[act]
+            print("value, value_better", value , value_better)
             self.niters += 1
+            if value_better < value:
+                better = actual
+                value_better = value
+                print("actualiza better", value_better)
 
         # Asignar la solución encontrada
-        self.tour = actual
-        self.value = value
+        self.tour = better
+        self.value = value_better
         # Calcular el tiempo de ejecución
         end = time()
         self.time = end - start
