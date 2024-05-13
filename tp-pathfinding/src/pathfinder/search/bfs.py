@@ -17,7 +17,6 @@ class BreadthFirstSearch:
         """
 
         # Initialize a node with the initial position
-        #node = Node("", grid.start, 0)
         node = Node("", state=grid.start, cost=0, parent=None, action=None)
 
         # Initialize the reached dictionary to be empty
@@ -85,5 +84,4 @@ function GRAPH-BFS(problema) return solución o fallo
                 if problema.test-objetivo(s’) then return solución(n’)
                 alcanzados.insertar(s’)
                 frontera.encolar(n’)
-
 '''

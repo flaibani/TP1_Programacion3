@@ -16,7 +16,6 @@ class AStarSearch:
             Solution: Solution found
         """
         # Initialize a node with the initial position
-        #node = Node("", grid.start, 0)
         node = Node("", state=grid.start, cost=0, parent=None, action=None)
 
         # Initialize the reached dictionary to be empty

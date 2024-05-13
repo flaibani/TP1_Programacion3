@@ -17,7 +17,6 @@ class DepthFirstSearch:
         """
 
         # Initialize a node with the initial position
-        #node = Node("", grid.start, 0)
         node = Node("", state=grid.start, cost=0, parent=None, action=None)
 
         # Initialize the explored dictionary to be empty
@@ -51,7 +50,7 @@ class DepthFirstSearch:
             successors = grid.get_neighbours(node.state)
             for (dir, new_state) in successors.items():
 
-                # Check if the successor is not reached
+                # Check if the successor is not explored
                 if new_state not in explored:
 
                     # Initialize the son node
