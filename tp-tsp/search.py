@@ -20,6 +20,7 @@ from problem import OptProblem
 from random import choice
 from time import time
 import math
+import random
 
 class LocalSearch:
     """Clase que representa un algoritmo de búsqueda local general."""
@@ -116,7 +117,7 @@ class HillClimbingReset(LocalSearch):
 
         # Criterio: el número de nodos determina el número de repeticiones 
         repeat = int(problem.G.number_of_nodes()) * 2
-        print(repeat)
+        print("HCR - Reinicios aleatorios: ",repeat)
 
         while True:
 
@@ -182,11 +183,14 @@ class Tabu(LocalSearch):
         # Arranca del estado inicial: [c0, c1, c2,..., cn-1, 0]
         actual = problem.init
         value = problem.obj_val(problem.init)
-        better = actual                                         # mejor solución
-        value_better = value                                    # valor objetivo de la mejor solución
+        best = actual                                           # mejor solución
+        best_value = value                                      # valor objetivo de la mejor solución
         tabu_list = []                                          # lista Tabú
         tabu_size = math.floor(problem.G.number_of_nodes()/8)   # tamaño de la lista Tabú
+        action_size = math.floor(problem.G.number_of_nodes()/3) # amplia la búsqueda en los mejores vecinos
+        counter_max = 1000                                      # máimode repeticiones sin mejoras
         counter = 0                                             # contador de soluciones sin mejoras 
+        print("tabu_size:", tabu_size, "tabu_action:", action_size, "counter_max:", counter_max)
 
         while True: #self.niters < 2000:
             # Determina las acciones que se pueden aplicar
@@ -198,12 +202,14 @@ class Tabu(LocalSearch):
             #            max(diff.values())]
 
             # Ordena los valores de diff de mayor a menor y se queda con los 10 mayores
-            max_acts = [act for act, val in diff.items() if val in sorted(diff.values(), reverse=True)[:10]]
-            #print("max_acts", max_acts)
-
+            max_acts = [act for act, val in diff.items() if val in sorted(diff.values(), reverse=True)[:action_size]]
+            #max_acts_val = {act: diff[act] for act in max_acts}
+            #print("max_acts", max_acts_val)
+            #print("tabu_list", tabu_list) 
             # Selecciona las acciones que no están en la lista Tabú
             no_tabu = [act for act in max_acts if act not in tabu_list]
-            #print("no_tabu", no_tabu)
+            #no_tabu_val = {act: max_acts_val[act] for act in no_tabu}
+            #print("no_tabu", no_tabu_val)
 
             # Si no hay acciones disponibles, termina la búsqueda
             #if not no_tabu:
@@ -214,32 +220,34 @@ class Tabu(LocalSearch):
             act = choice(no_tabu)
             #print("accion seleccionada", act)
 
-            # Actualiza la lista Tabú
-            tabu_list.append(act)
-            #print("tabu_list", tabu_list)
-
             # Controla la longitud de la lista Tabú
             if len(tabu_list) > tabu_size:
                 tabu_list.pop(0)
 
+            # Actualiza la lista Tabú
+            tabu_list.append(act)
+            #print("tabu_list", tabu_list)    
+
             actual = problem.result(actual, act)
             value = value + diff[act]
-            #print("value, value_better", value , value_better)
+            #print("value, value_better", value , best_value)
             self.niters += 1
             # Guarda el mejor estado, que será la solución
-            if value_better < value:
+            if best_value < value:
                 counter = 0
-                better = actual
-                value_better = value
+                best = actual
+                best_value = value
                 #print("actualiza better", value_better)
             else:
                 counter += 1
-            if counter >= 1000:
+            # Criterio de parada
+            # Permite counter_max repeticiones sin mejoras
+            if counter >= counter_max:
                 break
 
         # Asigna la solución encontrada
-        self.tour = better
-        self.value = value_better
+        self.tour = best
+        self.value = best_value
         # Calcula el tiempo de ejecución
         end = time()
         self.time = end - start
