@@ -32,7 +32,7 @@ class LocalSearch:
         self.tour = []  # Solucion, inicialmente vacia
         self.value = None  # Valor objetivo de la solucion
 
-    def solve(self, problem: OptProblem,instancia):
+    def solve(self, problem: OptProblem):
         """Resuelve un problema de optimizacion."""
         self.tour = problem.init
         self.value = problem.obj_val(problem.init)
@@ -45,7 +45,7 @@ class HillClimbing(LocalSearch):
     El criterio de parada es alcanzar un optimo local.
     """
 
-    def solve(self, problem: OptProblem,instancia):
+    def solve(self, problem: OptProblem):
         """Resuelve un problema de optimizacion con ascension de colinas.
 
         Argumentos:
@@ -76,7 +76,6 @@ class HillClimbing(LocalSearch):
             # Retornar si estamos en un optimo local 
             # (diferencia de valor objetivo no positiva)
             if diff[act] <= 0:
-
                 self.tour = actual
                 self.value = value
                 end = time()
@@ -85,13 +84,16 @@ class HillClimbing(LocalSearch):
 
             # Sino, nos movemos al sucesor
             else:
-
                 actual = problem.result(actual, act)
                 value = value + diff[act]
                 self.niters += 1
 
 class HillClimbingReset(LocalSearch):
-    def solve(self, problem: OptProblem,instancia):
+    def __init__(self,reseat) -> None:
+        """Construye una instancia de la clase."""
+        self.reseat = reseat  # Numero de reinicios
+        super().__init__()
+    def solve(self, problem: OptProblem):
         """Resuelve un problema de optimizacion con ascension de colinas.
 
         Argumentos:
@@ -108,18 +110,6 @@ class HillClimbingReset(LocalSearch):
         actual = problem.init
         value = problem.obj_val(problem.init)
         self.value = float('-inf')
-        #Se repite 20 veces porque así se garantiza 
-        #alcanzar el mayor máximo local que permite el  
-        #ascenso de colina y a su vez el consumo 
-        #de tiempo no es significativo. 
-        if (instancia=='instances/ar24.tsp'):
-            print("repeat 20")
-            repeat = 20
-        elif (instancia=='instances/att48.tsp'):
-            print("repeat 70")
-            repeat = 70    
-        else:
-            repeat =   45  
         while True:
 
             # Determinar las acciones que se pueden aplicar
@@ -129,21 +119,21 @@ class HillClimbingReset(LocalSearch):
             # Buscar las acciones que generan el mayor incremento de valor obj
             max_acts = [act for act, val in diff.items() if val ==
                         max(diff.values())]
-
+            #print("max_acts HCR", max_acts)
             # Elegir una accion aleatoria
             act = choice(max_acts)
-            
+            #print("act HCR", act)
             # Encontramos un máximo local 
             # (diferencia de valor objetivo no positiva)
             if diff[act] <= 0:
-                repeat -= 1
+                self.reseat -= 1
                 #El valor objetivo se mejora 
                 if self.value < value:
                     self.tour = actual
                     self.value = value
                 #Retornamos porque agotamos la posibilidad 
                 #de reiniciar la búsqueda
-                if repeat == 0:
+                if self.reseat == 0:
                     end = time()
                     self.time = end - start
                     return
@@ -154,12 +144,139 @@ class HillClimbingReset(LocalSearch):
                                     
             # Sino, nos movemos al sucesor
             else:
-
                 actual = problem.result(actual, act)
                 value = value + diff[act]
                 self.niters += 1
 
 
 class Tabu(LocalSearch):
-    def solve(self, problem: OptProblem,instancia):
-        pass
+    """Algoritmo de busqueda tabu."""
+
+    def __init__(self,max_tabu_size,limit_iters_without_progress) -> None:
+        """Construye una instancia de la clase."""
+        self.count_iters_without_progress = 0
+        self.max_tabu_size = max_tabu_size
+        self.limit_iters_without_progress = limit_iters_without_progress
+        super().__init__()
+
+    def solve(self, problem: OptProblem):
+        """Resuelve un problema de optimizacion con ascension de colinas.
+        Argumentos:
+        ==========
+        problem: OptProblem
+            un problema de optimizacion
+        """
+        # Inicio del reloj
+        start = time()
+
+        # Arrancamos del estado inicial
+        actual = problem.init
+        value = problem.obj_val(problem.init)
+        mejor = actual
+        mejor_value = value 
+        tabu = []
+        while True:
+
+            # Determinar las acciones que se pueden aplicar
+            # y las diferencias en valor objetivo que resultan
+            diff = problem.val_diff(actual)
+            for act in list(diff.keys()):
+                if act in tabu:
+                    diff.pop(act)
+
+            # Buscar las acciones que generan el mayor incremento de valor obj
+            max_acts = [act for act, val in diff.items() if val == 
+                        max(diff.values())]
+    
+            # Elegir una accion aleatoria
+            act = choice(max_acts)
+
+            #nos movemos al sucesor
+            actual = problem.result(actual, act)
+            value = value + diff[act]
+            tabu.append(act)   
+            if (len(tabu)>self.max_tabu_size):
+                tabu.pop(0)
+            
+            if (value>mejor_value):
+                self.count_iters_without_progress=0
+                mejor=actual
+                mejor_value=value  
+            else:
+                self.count_iters_without_progress+=1
+
+            self.niters += 1
+            if (self.count_iters_without_progress==self.limit_iters_without_progress):
+                self.tour = mejor
+                self.value = mejor_value
+                end = time()
+                self.time = end-start
+                break 
+            
+class TabuVariante(LocalSearch):
+    """Algoritmo de busqueda tabu."""
+
+    def __init__(self,max_tabu_size,limit_iters_without_progress,number_best_actions) -> None:
+        """Construye una instancia de la clase."""
+        self.count_iters_without_progress = 0
+        self.max_tabu_size = max_tabu_size
+        self.limit_iters_without_progress = limit_iters_without_progress
+        self.number_best_actions = number_best_actions
+        super().__init__()
+
+    def solve(self, problem: OptProblem):
+        """Resuelve un problema de optimizacion con ascension de colinas.
+        Argumentos:
+        ==========
+        problem: OptProblem
+            un problema de optimizacion
+        """
+        # Inicio del reloj
+        start = time()
+
+        # Arrancamos del estado inicial
+        actual = problem.init
+        value = problem.obj_val(problem.init)
+        mejor = actual
+        mejor_value = value 
+        tabu = []
+        while True:
+
+            # Determinar las acciones que se pueden aplicar
+            # y las diferencias en valor objetivo que resultan
+            diff = problem.val_diff(actual)
+            for act in list(diff.keys()):
+                if act in tabu:
+                    diff.pop(act)
+
+            # cambiar comentario
+            max_acts = [act for act, val in diff.items() if val in 
+                        sorted(diff.values(),reverse=True)[:self.number_best_actions]]
+    
+            # Elegir una accion aleatoria
+            act = choice(max_acts)
+
+            #nos movemos al sucesor
+            actual = problem.result(actual, act)
+            value = value + diff[act]
+            tabu.append(act)   
+            if (len(tabu)>self.max_tabu_size):
+                tabu.pop(0)
+            
+            if (value>mejor_value):
+                self.count_iters_without_progress=0
+                mejor=actual
+                mejor_value=value  
+            else:
+                self.count_iters_without_progress+=1
+
+            self.niters += 1
+            if (self.count_iters_without_progress==self.limit_iters_without_progress):
+                self.tour = mejor
+                self.value = mejor_value
+                end = time()
+                self.time = end-start
+                break 
+
+        
+        
