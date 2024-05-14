@@ -198,16 +198,17 @@ class Tabu(LocalSearch):
             # y las diferencias en valor objetivo que resultan
             diff = problem.val_diff(actual)
 
-            # Filtrar los elementos de diff donde act no esté en tabu_list
-            no_tabu_val = {act: diff[act] for act in diff if act not in tabu_list}
+            # Filtra los elementos de la tabu_list
+            no_tabu_dicc = {act: diff[act] for act in diff if act not in tabu_list}
 
-            # Obtener el valor máximo en no_tabu_val
-            max_val = max(no_tabu_val.values())
+            # Obtiene el valor máximo en no_tabu_val
+            max_val = max(no_tabu_dicc.values())
 
             # Crear una lista con todos los act donde val sea igual al máximo valor
-            no_tabu = [act for act, val in no_tabu_val.items() if val == max_val]
+            no_tabu = [act for act, val in no_tabu_dicc.items() if val == max_val]
+            print("Acciones posibles: ", no_tabu)
 
-            # los 10 mayores
+            # los n mayores
             #n = 7
             #top_n_items = heapq.nlargest(n, no_tabu_val.items(), key=lambda x: x[1])
             #no_tabu = [act for act, val in top_n_items]
@@ -219,7 +220,7 @@ class Tabu(LocalSearch):
                 break
             # Elige una acción aleatoria
             act = choice(no_tabu)
-            print("accion seleccionada", act)
+            #print("accion seleccionada", act)
 
             # Controla la longitud de la lista Tabú
             if len(tabu_list) > tabu_size:
@@ -231,7 +232,7 @@ class Tabu(LocalSearch):
 
             actual = problem.result(actual, act)
             value = value + diff[act]
-            print("value, value_better", value , best_value)
+            #print("value, value_best", value , best_value)
             self.niters += 1
             # Guarda el mejor estado, que será la solución
             if best_value < value:
