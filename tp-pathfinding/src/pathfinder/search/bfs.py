@@ -7,63 +7,63 @@ from ..models.node import Node
 class BreadthFirstSearch:
     @staticmethod
     def search(grid: Grid) -> Solution:
-        """Find path between two points in a grid using Breadth First Search
+        """Encuentra el camino entre dos puntos en una grilla usando la Búsqueda Primero en Anchura(BFS)
 
         Args:
-            grid (Grid): Grid of points
+            grid (Grid): Grilla de puntos
             
         Returns:
-            Solution: Solution found
+            Solution: Solución encontradas
         """
 
-        # Initialize a node with the initial position
+        # Inicializa un nodo con la posición inicial
         node = Node("", state=grid.start, cost=0, parent=None, action=None)
 
-        # Initialize the reached dictionary to be empty
+        # Inicializa el diccionario de Alcanzados como vacío
         reached = {} 
 
-        # Return if the node contains a goal state
+        # Retorna si el nodo contiene un estado objetivo
         if node.state == grid.end:
             return Solution(node, reached)
 
-        # Initialize the frontier with the initial node
-        # In this example, the frontier is a queue
+        # Inicializar la Frontera con el nodo inicial
+        # En este ejemplo, la frontera es una Cola
         frontier = QueueFrontier()
         frontier.add(node)
 
-        # Add the node to the reached dictionary
+        # Agrega el nodo al diccionario de Alcanzados
         reached[node.state] = True
 
         while True:
 
-            #  Fail if the frontier is empty
+            # Falla si la Frontera está vacía
             if frontier.is_empty():
                 return NoSolution(reached)
 
-            # Remove a node from the frontier
+            # Elimina un nodo de la Frontera
             node = frontier.remove()
 
             successors = grid.get_neighbours(node.state)
             for (dir, new_state) in successors.items():
 
-                # Check if the successor is not reached
+                # Chequea si el sucesor no fue alcanzado
                 if new_state not in reached:
 
-                    # Initialize the son node
+                    # Inicializa el nodo hijo
                     new_node = Node("", new_state,
                                 node.cost + grid.get_cost(new_state),
                                 parent=node, action=dir)
 
-                    # Return if the node contains a goal state
+                    # Retorna si el nodo contiene un estado objetivo
                     # In this example, the goal test is run
                     # before adding a new node to the frontier
                     if new_state == grid.end:
                         return Solution(new_node, reached)
 
-                    # Mark the successor as reached
+                    # Marca al sucesor como Alcanzado
                     reached[new_state] = True
 
-                    # Add the new node to the frontier
+                    # Agrega el nodo de la Frontera
                     frontier.add(new_node)
 
 '''
