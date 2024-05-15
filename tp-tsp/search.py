@@ -15,26 +15,25 @@ No viene implementado, se debe completar.
 No viene implementado, se debe completar.
 """
 
+
 from __future__ import annotations
 from problem import OptProblem
 from random import choice
 from time import time
-import math
-import random
-import heapq
+
 
 class LocalSearch:
     """Clase que representa un algoritmo de búsqueda local general."""
 
     def __init__(self) -> None:
         """Construye una instancia de la clase."""
-        self.niters = 0     # Número de iteraciones totales
-        self.time = 0       # Tiempo de ejecucion
-        self.tour = []      # Solución, inicialmente vacía
-        self.value = None   # Valor objetivo de la solución
+        self.niters = 0     # NÚmero de iteraciones totales
+        self.time = 0       # Tiempo de ejecuciÓn
+        self.tour = []      # SoluciÓn, inicialmente vacÍa
+        self.value = None   # Valor objetivo de la soluciÓn
 
-    def solve(self, problem: OptProblem, instancia):
-        """Resuelve un problema de optimización."""
+    def solve(self, problem: OptProblem):
+        """Resuelve un problema de optimizaciÓn."""
         self.tour = problem.init
         self.value = problem.obj_val(problem.init)
 
@@ -48,13 +47,12 @@ class HillClimbing(LocalSearch):
 
     def solve(self, problem: OptProblem):
         """Resuelve un problema de optimización con ascensión de colinas.
-
         Argumentos:
         ==========
         problem: OptProblem
             un problema de optimización
         """
-        # Iniciar del reloj
+        # Inicio del reloj
         start = time()
 
         # Arranca del estado inicial: [c0, c1, c2,..., cn-1, 0]
@@ -67,7 +65,7 @@ class HillClimbing(LocalSearch):
             # y las diferencias en valor objetivo que resultan
             diff = problem.val_diff(actual)
 
-            # Busca las acciones que generan el mayor incremento de valor objetivo
+            # Busca las acciones que generan el mayor incremento de valor obj
             max_acts = [act for act, val in diff.items() if val ==
                         max(diff.values())]
 
@@ -89,7 +87,6 @@ class HillClimbing(LocalSearch):
                 value = value + diff[act]
                 self.niters += 1
 
-
 class HillClimbingReset(LocalSearch):
     """Clase que representa un algoritmo de ascensión de colinas con reinicio aleatorio.
 
@@ -98,9 +95,13 @@ class HillClimbingReset(LocalSearch):
     Retorna el estado con mejor valor objetivo encontrado entre todos los reinicios realizados.
     """
 
+    def __init__(self,reset) -> None:
+        """Construye una instancia de la clase."""
+        self.reset = reset  # Numero de reinicios
+        super().__init__()
+
     def solve(self, problem: OptProblem):
         """Resuelve un problema de optimización con ascensión de colinas.
-
         Argumentos:
         ==========
         problem: OptProblem
@@ -108,18 +109,13 @@ class HillClimbingReset(LocalSearch):
         repeat: int
             número de reinicios aleatorios permitidos
         """
-        # Inicia el reloj
+        # Inicio del reloj
         start = time()
 
         # Arranca del estado inicial: [c0, c1, c2,..., cn-1, 0]
         actual = problem.init
         value = problem.obj_val(problem.init)
         self.value = float('-inf')
-
-        # Criterio: el número de nodos determina el número de repeticiones 
-        repeat = int(problem.G.number_of_nodes()) * 2
-        print("HCR - Reinicios aleatorios: ",repeat)
-
         while True:
 
             # Determina las acciones que se pueden aplicar
@@ -129,20 +125,22 @@ class HillClimbingReset(LocalSearch):
             # Busca las acciones que generan el mayor incremento de valor obj
             max_acts = [act for act, val in diff.items() if val ==
                         max(diff.values())]
+            #print("max_acts HCR", max_acts)
 
             # Elige una acción aleatoria
             act = choice(max_acts)
- 
+            #print("act HCR", act)
+
             # Encuentra un máximo local 
             # (diferencia de valor objetivo no positiva)
             if diff[act] <= 0:
-                repeat -= 1
+                self.reset -= 1
                 # El valor objetivo se mejora 
                 if self.value < value:
                     self.tour = actual
                     self.value = value
                 # Retorna al llegar al límite de reinicios establecido
-                if repeat == 0:
+                if self.reset == 0:
                     end = time()
                     self.time = end - start
                     return
@@ -150,11 +148,10 @@ class HillClimbingReset(LocalSearch):
                 else: 
                     actual = problem.random_reset()
                     value = problem.obj_val(actual)
-                                    
+
             # Sino, se mueve al sucesor
             else:
                 actual = problem.result(actual, act)
-                #print(value, diff[act])
                 value = value + diff[act]
                 self.niters += 1
 
@@ -171,6 +168,13 @@ class Tabu(LocalSearch):
 
     """
 
+    def __init__(self,max_tabu_size,limit_iters_without_progress) -> None:
+        """Construye una instancia de la clase."""
+        self.count_iters_without_progress = 0
+        self.max_tabu_size = max_tabu_size
+        self.limit_iters_without_progress = limit_iters_without_progress
+        super().__init__()
+
     def solve(self, problem: OptProblem):
         """Resuelve un problema de optimización con la búsqueda Tabú.
         Argumentos:
@@ -178,83 +182,63 @@ class Tabu(LocalSearch):
         problem: OptProblem
             un problema de optimización
         """
-        # Inicia del reloj
+
+        # Inicio del reloj
         start = time()
 
         # Arranca del estado inicial: [c0, c1, c2,..., cn-1, 0]
         actual = problem.init
         value = problem.obj_val(problem.init)
-        best = actual                                           # mejor solución
-        best_value = value                                      # valor objetivo de la mejor solución
-        tabu_list = []                                          # lista Tabú
-        tabu_size = math.floor(problem.G.number_of_nodes()/8)   # tamaño de la lista Tabú
-        action_size = math.floor(problem.G.number_of_nodes()/3) # amplia la búsqueda en los mejores vecinos
-        counter_max = 1000                                      # máimode repeticiones sin mejoras
-        counter = 0                                             # contador de soluciones sin mejoras 
-        print("tabu_size:", tabu_size, "tabu_action:", action_size, "counter_max:", counter_max)
+        best = actual           # mejor solución
+        best_value = value      # valor objetivo de la mejor solución 
+        tabu = []               # lista Tabú
+        while True:
 
-        while True: #self.niters < 2000:
-            # Determina las acciones que se pueden aplicar
-            # y las diferencias en valor objetivo que resultan
+            # Determina las acciones que pueden aplicarse y que no están en la lista Tabú
             diff = problem.val_diff(actual)
+            for act in list(diff.keys()):
+                if act in tabu:
+                    diff.pop(act)
 
-            # Filtra los elementos de la tabu_list
-            no_tabu_dicc = {act: diff[act] for act in diff if act not in tabu_list}
+            # Busca las acciones que generan el mayor incremento de valor obj
+            max_acts = [act for act, val in diff.items() if val == 
+                        max(diff.values())]
 
-            # Obtiene el valor máximo en no_tabu_val
-            max_val = max(no_tabu_dicc.values())
-
-            # Crear una lista con todos los act donde val sea igual al máximo valor
-            no_tabu = [act for act, val in no_tabu_dicc.items() if val == max_val]
-            print("Acciones posibles: ", no_tabu)
-
-            # los n mayores
-            #n = 7
-            #top_n_items = heapq.nlargest(n, no_tabu_val.items(), key=lambda x: x[1])
-            #no_tabu = [act for act, val in top_n_items]
-
-            # Si no hay acciones disponibles, termina la búsqueda
-            #if not no_tabu:
-            if len(no_tabu) == 0:
-                print("Tabú: No existen acciones permitidas", self.niters)
-                break
             # Elige una acción aleatoria
-            act = choice(no_tabu)
-            #print("accion seleccionada", act)
+            act = choice(max_acts)
 
-            # Controla la longitud de la lista Tabú
-            if len(tabu_list) > tabu_size:
-                tabu_list.pop(0)
-
-            # Actualiza la lista Tabú
-            tabu_list.append(act)
-            #print("tabu_list", tabu_list)    
-
+            # Se mueve al sucesor
             actual = problem.result(actual, act)
             value = value + diff[act]
-            #print("value, value_best", value , best_value)
-            self.niters += 1
+
+            # Actualiza la lista Tabú
+            tabu.append(act) 
+
+            # Controla el tamaño de la lista Tabú            
+            if (len(tabu) > self.max_tabu_size):
+                tabu.pop(0)
+
             # Guarda el mejor estado, que será la solución
-            if best_value < value:
-                counter = 0
+            if (value > best_value):
+                self.count_iters_without_progress=0
                 best = actual
-                best_value = value
-                #print("actualiza better", value_better)
+                best_value = value  
             else:
-                counter += 1
+                self.count_iters_without_progress += 1
+
+            self.niters += 1
+
             # Criterio de parada
-            # Permite counter_max repeticiones sin mejoras
-            if counter >= counter_max:
-                break
+            # Límite de repeticiones sin mejoras
+            if (self.count_iters_without_progress == self.limit_iters_without_progress):
+                self.tour = best
+                self.value = best_value
+                end = time()
+                self.time = end-start
+                break 
 
-        # Asigna la solución encontrada
-        self.tour = best
-        self.value = best_value
-        # Calcula el tiempo de ejecución
-        end = time()
-        self.time = end - start
 
-class Tabu_ant(LocalSearch):
+class TabuVariante(LocalSearch):
     """Clase que representa un algoritmo de búsqueda tabú.
     
     Incorpora mejoras al algoritmo de ascensión de colinas ciertas
@@ -266,88 +250,75 @@ class Tabu_ant(LocalSearch):
 
     """
 
+    def __init__(self,max_tabu_size,limit_iters_without_progress,number_best_actions) -> None:
+        """Construye una instancia de la clase."""
+        self.count_iters_without_progress = 0
+        self.max_tabu_size = max_tabu_size
+        self.limit_iters_without_progress = limit_iters_without_progress
+        self.number_best_actions = number_best_actions
+        super().__init__()
+
     def solve(self, problem: OptProblem):
-        """Resuelve un problema de optimización con la búsqueda Tabú.
+        """Resuelve un problema de optimización con una variante de la búsqueda Tabú.
         Argumentos:
         ==========
         problem: OptProblem
             un problema de optimización
         """
-        # Inicia del reloj
+
+        # Inicio del reloj
         start = time()
 
         # Arranca del estado inicial: [c0, c1, c2,..., cn-1, 0]
         actual = problem.init
         value = problem.obj_val(problem.init)
-        best = actual                                           # mejor solución
-        best_value = value                                      # valor objetivo de la mejor solución
-        tabu_list = []                                          # lista Tabú
-        tabu_size = math.floor(problem.G.number_of_nodes()/8)   # tamaño de la lista Tabú
-        action_size = math.floor(problem.G.number_of_nodes()/3) # amplia la búsqueda en los mejores vecinos
-        counter_max = 1000                                      # máimode repeticiones sin mejoras
-        counter = 0                                             # contador de soluciones sin mejoras 
-        print("tabu_size:", tabu_size, "tabu_action:", action_size, "counter_max:", counter_max)
+        best = actual
+        best_value = value 
+        tabu = []
+        while True:
 
-        while True: #self.niters < 2000:
-            # Determina las acciones que se pueden aplicar
-            # y las diferencias en valor objetivo que resultan
+            # Determina las acciones que pueden aplicarse y que no están en la lista Tabú
             diff = problem.val_diff(actual)
+            for act in list(diff.keys()):
+                if act in tabu:
+                    diff.pop(act)
 
-            # Busca las acciones que generan el mayor incremento de valor obj
-            #max_acts = [act for act, val in diff.items() if val ==
-            #            max(diff.values())]
+            # Selecciona una cantidad (self.number_best_actions) de acciones con mejor valor objetivo
+            max_acts = [act for act, val in diff.items() if val in 
+                        sorted(diff.values(), reverse=True)[:self.number_best_actions]]
 
-            # Ordena los valores de diff de mayor a menor y se queda con los 10 mayores
-            max_acts = [act for act, val in diff.items() if val in sorted(diff.values(), reverse=True)[:action_size]]
-            #max_acts_val = {act: diff[act] for act in max_acts}
-            #print("max_acts", max_acts_val)
-            #print("tabu_list", tabu_list) 
-            # Selecciona las acciones que no están en la lista Tabú
-            no_tabu = [act for act in max_acts if act not in tabu_list]
-            #no_tabu_val = {act: max_acts_val[act] for act in no_tabu}
-            #print("no_tabu", no_tabu_val)
-
-            # Si no hay acciones disponibles, termina la búsqueda
-            #if not no_tabu:
-            if len(no_tabu) == 0:
-                print("Tabú: No existen acciones permitidas", self.niters)
-                break
             # Elige una acción aleatoria
-            act = choice(no_tabu)
-            print("accion seleccionada", act)
+            act = choice(max_acts)
 
-            # Controla la longitud de la lista Tabú
-            if len(tabu_list) > tabu_size:
-                tabu_list.pop(0)
-
-            # Actualiza la lista Tabú
-            tabu_list.append(act)
-            #print("tabu_list", tabu_list)    
-
+            # Se mueve al sucesor
             actual = problem.result(actual, act)
             value = value + diff[act]
-            #print("value, value_better", value , best_value)
-            self.niters += 1
+
+            # Actualiza la lista Tabú
+            tabu.append(act)   
+
+            # Controla el tamaño de la lista Tabú
+            if (len(tabu) > self.max_tabu_size):
+                tabu.pop(0)
+
             # Guarda el mejor estado, que será la solución
-            if best_value < value:
-                counter = 0
+            if (value > best_value):
+                self.count_iters_without_progress = 0
                 best = actual
-                best_value = value
-                #print("actualiza better", value_better)
+                best_value = value  
             else:
-                counter += 1
+                self.count_iters_without_progress += 1
+
+            self.niters += 1
+
             # Criterio de parada
-            # Permite counter_max repeticiones sin mejoras
-            if counter >= counter_max:
-                break
-
-        # Asigna la solución encontrada
-        self.tour = best
-        self.value = best_value
-        # Calcula el tiempo de ejecución
-        end = time()
-        self.time = end - start
-
+            # Límite de repeticiones sin mejoras            
+            if (self.count_iters_without_progress == self.limit_iters_without_progress):
+                self.tour = best
+                self.value = best_value
+                end = time()
+                self.time = end-start
+                break 
 
 '''
 Ejemplo — TSP.

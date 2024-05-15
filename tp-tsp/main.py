@@ -15,7 +15,8 @@ import problem
 HILL_CLIMBING = "hill"
 HILL_CLIMBING_RANDOM_RESET = "hill_reset"
 TABU_SEARCH = "tabu"
-ALGO_NAMES = [HILL_CLIMBING, HILL_CLIMBING_RANDOM_RESET, TABU_SEARCH]
+TABU_SEARCH_VARIANTE = "tabu_variante"
+ALGO_NAMES = [HILL_CLIMBING, HILL_CLIMBING_RANDOM_RESET, TABU_SEARCH,TABU_SEARCH_VARIANTE]
 
 
 def main() -> None:
@@ -30,15 +31,20 @@ def main() -> None:
     # Construir la instancia de TSP
     p = problem.TSP(G)
 
+    number_nodes = p.G.number_of_nodes()
     # Construir las instancias de los algoritmos
     algos = {HILL_CLIMBING: search.HillClimbing(),
-             HILL_CLIMBING_RANDOM_RESET: search.HillClimbingReset(),
-             TABU_SEARCH: search.Tabu()}
+             HILL_CLIMBING_RANDOM_RESET: search.HillClimbingReset(round(number_nodes * 1.5)),
+             TABU_SEARCH: search.Tabu(max_tabu_size = round(number_nodes * 5 / 24 + 15),
+                                        limit_iters_without_progress = number_nodes * 20),
+             TABU_SEARCH_VARIANTE: search.TabuVariante(max_tabu_size = round(number_nodes / 8) ,
+                                                        limit_iters_without_progress = 1000, #number_nodes * 30,
+                                                        number_best_actions = round(number_nodes / 3))} #round(number_nodes / 3)
 
     # Resolver el TSP con cada algoritmo
     for algo in algos.values():
         algo.solve(p)
-
+        
     # Mostrar resultados por linea de comandos
     print("Valor:", "Tiempo:", "Iters:", "Algoritmo:", sep="\t\t")
     for name, algo in algos.items():
