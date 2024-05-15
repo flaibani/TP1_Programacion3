@@ -239,15 +239,10 @@ class Tabu(LocalSearch):
 
 
 class TabuVariante(LocalSearch):
-    """Clase que representa un algoritmo de búsqueda tabú.
+    """Clase que representa una variante algoritmo de búsqueda tabú.
     
-    Incorpora mejoras al algoritmo de ascensión de colinas ciertas
-    para escapar de máximos locales que no son globales.
-
-    Se mueve siempre al sucesor con mejor valor objetivo (mejor, igual o peor o que el actual).
-    Mantiene una memoria de corto plazo con información de las últimas iteraciones,
-    para evitar estados visitados recientemente y no ciclar.
-
+    Modificación del algoritmo Tabú que elige entre un número determinado de mejores 
+    acciones posibles (number_best_actions)
     """
 
     def __init__(self,max_tabu_size,limit_iters_without_progress,number_best_actions) -> None:

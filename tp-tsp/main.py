@@ -34,7 +34,7 @@ def main() -> None:
     number_nodes = p.G.number_of_nodes()
     # Construir las instancias de los algoritmos
     algos = {HILL_CLIMBING: search.HillClimbing(),
-             HILL_CLIMBING_RANDOM_RESET: search.HillClimbingReset(round(number_nodes * 1.5)),
+             HILL_CLIMBING_RANDOM_RESET: search.HillClimbingReset(round(number_nodes * 2)),
              TABU_SEARCH: search.Tabu(max_tabu_size = round(number_nodes * 5 / 24 + 15),
                                         limit_iters_without_progress = number_nodes * 20),
              TABU_SEARCH_VARIANTE: search.TabuVariante(max_tabu_size = round(number_nodes / 8) ,
