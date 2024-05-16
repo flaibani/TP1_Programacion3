@@ -20,7 +20,7 @@ class DepthFirstSearch:
         node = Node("", state=grid.start, cost=0, parent=None, action=None)
 
         # Inicializa el diccionario de Explorados como vacío
-        explored = {} 
+        explored = {}  
 
         # Retorna si el nodo contiene un estado objetivo
         if node.state == grid.end:
@@ -59,32 +59,10 @@ class DepthFirstSearch:
                                 parent=node, action=dir)
 
                     # Retorna si el nodo contiene un estado objetivo
-                    # In this example, the goal test is run
-                    # before adding a new node to the frontier
+                    # Aplica el test objetivo
+                    # antes de agregar el nodo a la Frontera
                     if new_state == grid.end:
                         return Solution(new_node, explored)
 
                     # Agrega el nodo de la Frontera
                     frontier.add(new_node)
-
-'''
-function GRAPH-DFS(problema) return solución o fallo
-    n₀ ← NODO(problema.estado-inicial, None, None, 0)
-    if problema.test-objetivo(n₀.estado) then return solución(n₀)
-    frontera ← Pila()
-    frontera.apilar(n₀)
-    expandidos ← {}
-    do
-        if frontera.vacía() then return fallo
-        n ← frontera.desapilar()
-
-        if n.estado is in expandidos then continue
-        expandidos.insertar(n.estado)
-
-        forall a in problema.acciones(n.estado) do
-            s’ ← problema.resultado(n.estado, a)
-            if s’ is not in expandidos then
-                n’ ← Nodo(s’, n, a, n.costo + problema.costo-individual(n.estado,a))
-                if problema.test-objetivo(s’) then return solución(n’)
-                frontera.apilar(n’)
-'''

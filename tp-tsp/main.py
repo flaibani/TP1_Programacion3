@@ -39,7 +39,7 @@ def main() -> None:
                                         limit_iters_without_progress = number_nodes * 20),
              TABU_SEARCH_VARIANTE: search.TabuVariante(max_tabu_size = round(number_nodes / 8) ,
                                                         limit_iters_without_progress = 1000, #number_nodes * 30,
-                                                        number_best_actions = round(number_nodes / 3))} #round(number_nodes / 3)
+                                                        number_best_actions = round(number_nodes / 3))}
 
     # Resolver el TSP con cada algoritmo
     for algo in algos.values():

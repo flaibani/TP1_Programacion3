@@ -32,7 +32,7 @@ class LocalSearch:
         self.tour = []      # SoluciÓn, inicialmente vacÍa
         self.value = None   # Valor objetivo de la soluciÓn
 
-    def solve(self, problem: OptProblem):
+    def solve(self, problem: OptProblem) -> None:
         """Resuelve un problema de optimizaciÓn."""
         self.tour = problem.init
         self.value = problem.obj_val(problem.init)
@@ -45,7 +45,7 @@ class HillClimbing(LocalSearch):
     El criterio de parada es alcanzar un óptimo local.
     """
 
-    def solve(self, problem: OptProblem):
+    def solve(self, problem: OptProblem) -> None:
         """Resuelve un problema de optimización con ascensión de colinas.
         Argumentos:
         ==========
@@ -95,19 +95,17 @@ class HillClimbingReset(LocalSearch):
     Retorna el estado con mejor valor objetivo encontrado entre todos los reinicios realizados.
     """
 
-    def __init__(self,reset) -> None:
+    def __init__(self, reset: int) -> None:
         """Construye una instancia de la clase."""
-        self.reset = reset  # Numero de reinicios
+        self.reset = reset  # Número de reinicios
         super().__init__()
 
-    def solve(self, problem: OptProblem):
-        """Resuelve un problema de optimización con ascensión de colinas.
+    def solve(self, problem: OptProblem) -> None:
+        """Resuelve un problema de optimización con ascensión de colinas con reinicio aleatorio.
         Argumentos:
         ==========
         problem: OptProblem
             un problema de optimización
-        repeat: int
-            número de reinicios aleatorios permitidos
         """
         # Inicio del reloj
         start = time()
@@ -168,14 +166,14 @@ class Tabu(LocalSearch):
 
     """
 
-    def __init__(self,max_tabu_size,limit_iters_without_progress) -> None:
+    def __init__(self, max_tabu_size: int, limit_iters_without_progress: int) -> None:
         """Construye una instancia de la clase."""
         self.count_iters_without_progress = 0
         self.max_tabu_size = max_tabu_size
         self.limit_iters_without_progress = limit_iters_without_progress
         super().__init__()
 
-    def solve(self, problem: OptProblem):
+    def solve(self, problem: OptProblem) -> None:
         """Resuelve un problema de optimización con la búsqueda Tabú.
         Argumentos:
         ==========
@@ -245,7 +243,7 @@ class TabuVariante(LocalSearch):
     acciones posibles (number_best_actions)
     """
 
-    def __init__(self,max_tabu_size,limit_iters_without_progress,number_best_actions) -> None:
+    def __init__(self,max_tabu_size: int, limit_iters_without_progress: int, number_best_actions: int) -> None:
         """Construye una instancia de la clase."""
         self.count_iters_without_progress = 0
         self.max_tabu_size = max_tabu_size
@@ -253,7 +251,7 @@ class TabuVariante(LocalSearch):
         self.number_best_actions = number_best_actions
         super().__init__()
 
-    def solve(self, problem: OptProblem):
+    def solve(self, problem: OptProblem) -> None:
         """Resuelve un problema de optimización con una variante de la búsqueda Tabú.
         Argumentos:
         ==========
@@ -314,42 +312,3 @@ class TabuVariante(LocalSearch):
                 end = time()
                 self.time = end-start
                 break 
-
-'''
-Ejemplo — TSP.
-Comenzar con un tour con la ciudad inicial y agregar las
-ciudades de a una, en el orden en que se visitan en el estado
-objetivo.
-
-function LOCAL-SEARCH(problema) return estado
-    s ← problema.estado-inicial
-    while no se cumple criterio de parada do:
-        S’ ← {problema.resultado(s,a) for
-            a є problema.acciones(s)}
-        elegir un buen sucesor s’ є S’
-        s ← s’
-    return s
-
-function ASCENSIÓN-COLINAS(problema) return estado
-    s ← problema.estado-inicial
-    do
-        S’ ← {problema.resultado(s,a) for
-            є problema.acciones(s)}
-        s’ ← argmax(problema.f, S’)
-        if (problema.f(s’) ≤ problema.f(s)) then return s
-    s ← s’
-
-function BÚSQUEDA-TABÚ(problema) return estado
-    actual ← problema.estado-inicial
-    mejor ← actual
-    tabu ← inicialmente vacía
-    while no se cumpla el criterio de parada do
-        sucesores ← {problema.resultado(actual,a) for a є problema.acciones(actual)}
-        #algun cambio
-        no_tabues ← {sucesor for sucesor є sucesores if sucesor no es tabú}
-        sucesor ← argmax(problema.f, no_tabues}
-        if problema.h(mejor) < problema.h(sucesor) then mejor ← sucesor
-        actualizar la lista tabú
-        actual ← sucesor
-    return mejor
-'''

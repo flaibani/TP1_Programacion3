@@ -55,8 +55,8 @@ class BreadthFirstSearch:
                                 parent=node, action=dir)
 
                     # Retorna si el nodo contiene un estado objetivo
-                    # In this example, the goal test is run
-                    # before adding a new node to the frontier
+                    # Aplica el test objetivo
+                    # antes de agregar el nodo a la Frontera
                     if new_state == grid.end:
                         return Solution(new_node, reached)
 

@@ -43,8 +43,8 @@ class AStarSearch:
             node = frontier.pop()
 
             # Retorna si el nodo contiene un estado objetivo
-            # In this example, the goal test is run
-            # before adding a new node to the frontier
+            # Aplica el test objetivo
+            # después de sacar el nodo de la Frontera
             if node.state == grid.end:
                 return Solution(node, reached)
 
@@ -65,22 +65,3 @@ class AStarSearch:
 
                     # Agrega el nodo de la Frontera
                     frontier.add(new_node, node.cost + grid.h_manhatan(node.state))
-
-'''
-function GRAPH-ASTAR(problema,h) return solución o fallo
-    n₀ ← NODO(problema.estado-inicial, None, None, 0)
-    frontera ← ColaPrioridad()
-    frontera.encolar(n₀, n₀.costo+h(n₀))
-    alcanzados ← {n₀.estado: n₀.costo}
-    do
-        if frontera.vacía() then return fallo
-        n ← frontera.desencolar()
-        if problema.test-objetivo(n.estado) then return solución(n)
-        forall a in problema.acciones(n.estado) do
-            s’ ← problema.resultado(n.estado, a)
-            c’ ← n.costo + problema.costo-individual(n.estado,a)
-            if s’ is not in alcanzados or c’ < alcanzados[s’] then
-                n’ ← Nodo(s’, n, a, c’)
-                alcanzados[s’] ← c’
-                frontera.encolar(n’, n’.costo+h(n’))
-'''

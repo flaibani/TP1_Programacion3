@@ -43,8 +43,9 @@ class UniformCostSearch:
             node = frontier.pop()
 
             # Retorna si el nodo contiene un estado objetivo
-            # In this example, the goal test is run
-            # before adding a new node to the frontier
+            # Aplica el test objetivo
+            # después de sacar el nodo de la Frontera
+            # Garantiza optimalidad
             if node.state == grid.end:
                 return Solution(node, reached)
 
@@ -65,23 +66,4 @@ class UniformCostSearch:
 
                     # Agrega el nodo de la Frontera
                     frontier.add(new_node, cost)
-   
-'''
-function GRAPH-UCS(problema) return solución o fallo
-    n₀ ← NODO(problema.estado-inicial, None, None, 0)
-    frontera ← ColaPrioridad()
-    frontera.encolar(n₀,n₀.costo)
-    alcanzados ← {n₀.estado: n₀.costo}
-    do
-        if frontera.vacía() then return fallo
-        n ← frontera.desencolar()
 
-        if problema.test-objetivo(n.estado) then return solución(n)
-        forall a in problema.acciones(n.estado) do
-            s’ ← problema.resultado(n.estado, a)
-            c’ ← n.costo + problema.costo-individual(n.estado,a)
-            if s’ is not in alcanzados or c’ < alcanzados[s’] then
-                n’ ← Nodo(s’, n, a, c’)
-                alcanzados[s’] ← c’
-                frontera.encolar(n’,c’)
-'''
