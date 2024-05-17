@@ -30,20 +30,25 @@ def main() -> None:
 
     # Construir la instancia de TSP
     p = problem.TSP(G)
+
     print("Los parámetros se calculan a partir de la cantidad de nodos del grafo elegido")
     ingresa_manual = input("¿Prefiere ingresarlos manualmente? (S-N)\t")
-    if (ingresa_manual == 'S'):
+
+    if (ingresa_manual.upper() == 'S'):
         print("*** HILL CLIMBING RESET ***\n")
-        reinicio = int(input("Ingrese la cantidad de reinicios(HillReset)\t"))
+        reinicio = int(input("Ingrese la cantidad de reinicios\t"))
+
         print("\n*** TABU ***")
-        tabu_tamaño_lista = int(input("Ingrese tamaño lista tabú(Tabu)\t"))
-        tabu_iteraciones_sin_progreso = int(input("Ingrese nro de iteraciones sin progreso(Tabu)\t"))
+        tabu_tamaño_lista = int(input("Ingrese tamaño lista tabú\t"))
+        tabu_iteraciones_sin_progreso = int(input("Ingrese nro de iteraciones sin progreso\t"))
+
         print("\n*** TABU VARIANTE ***")
-        tabu_var_tamaño_lista = int(input("Ingrese tamaño lista tabú(Tabú Variante)\t"))
-        tabu_var_iteraciones_sin_progreso = int(input("Ingrese nro de iteraciones sin progreso(Tabú Variante)\t"))
-        tabu_var_mejores_sucesores = int(input("Ingrese cantidad de mejores sucesores(Tabú Variante)\t"))
+        tabu_var_tamaño_lista = int(input("Ingrese tamaño lista tabú\t"))
+        tabu_var_iteraciones_sin_progreso = int(input("Ingrese nro de iteraciones sin progreso\t"))
+        tabu_var_mejores_sucesores = int(input("Ingrese cantidad de mejores sucesores\t"))
+
         algos = {HILL_CLIMBING: search.HillClimbing(),
-                HILL_CLIMBING_RANDOM_RESET: search.HillClimbingReset(reset=reinicio),
+                HILL_CLIMBING_RANDOM_RESET: search.HillClimbingReset(reset = reinicio),
                 TABU_SEARCH: search.Tabu(max_tabu_size = tabu_tamaño_lista,
                                             limit_iters_without_progress = tabu_iteraciones_sin_progreso),
                 TABU_SEARCH_VARIANTE: search.TabuVariante(max_tabu_size = tabu_var_tamaño_lista ,
@@ -64,7 +69,7 @@ def main() -> None:
     for algo in algos.values():
         algo.solve(p)
         
-    # Mostrar resultados por linea de comandos
+    # Mostrar resultados por línea de comandos
     print("\nValor:", "Tiempo:", "Iters:", "Algoritmo:", sep="\t\t")
     for name, algo in algos.items():
         print(algo.value, "%.2f" % algo.time, algo.niters, name, sep="\t\t")
