@@ -31,7 +31,7 @@ class UniformCostSearch:
         # Inicializar la frontera con el nodo inicial
         # En este ejemplo, la frontera es una Cola con Prioridad
         frontier = PriorityQueueFrontier()
-        frontier.add(node)
+        frontier.add(node, node.cost) 
 
         while True:
 
@@ -48,12 +48,17 @@ class UniformCostSearch:
             # Garantiza optimalidad
             if node.state == grid.end:
                 return Solution(node, reached)
-
+            # print("Valor",node.value)
+            # print("Estado",node.state)
+            # print("Costo",node.cost)
+            # print("Accion",node.action)
+            # print("Padre", node.parent)
+            # print(reached)
             successors = grid.get_neighbours(node.state)
             for (dir, new_state) in successors.items():
 
                 cost = node.cost + grid.get_cost(new_state)
-                # Chequea si el sucesor no fue alcanzado
+                # Chequea si el sucesor no fue alcanzado o si está en Alcanzados con un costo es mayor
                 if new_state not in reached or cost < reached[new_state]:
                         
                     # Inicializa el nodo hijo

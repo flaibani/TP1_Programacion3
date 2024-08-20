@@ -63,5 +63,5 @@ class AStarSearch:
                     # Marca al sucesor como Alcanzado
                     reached[new_state] = cost
 
-                    # Agrega el nodo de la Frontera
-                    frontier.add(new_node, node.cost + grid.h_manhatan(node.state))
+                    # Agrega el nodo de la Frontera (corregido)
+                    frontier.add(new_node, node.cost + grid.h_manhatan(new_node.state))

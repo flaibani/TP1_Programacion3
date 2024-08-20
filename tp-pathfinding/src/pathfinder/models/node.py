@@ -15,6 +15,7 @@ class Node:
         self.parent = parent
         self.action = action
         self.estimated_distance = float("inf")
+        #self.depth = parent.depth + 1 if parent else 0  # Calcula la profundidad
 
     def __lt__(self, other: Node) -> bool:
         if self.estimated_distance == float("inf"):
